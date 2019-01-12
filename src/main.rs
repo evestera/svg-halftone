@@ -1,12 +1,14 @@
 use image::{GenericImageView, Luma, Pixel};
+use std::error::Error;
 use std::fs::File;
 use std::io::{BufWriter, Write};
+use std::result::Result;
 
 mod svg;
 
-use crate::svg::{circle, g, svg, Element};
+use crate::svg::{circle, g, rect, svg};
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let samples_width = 150;
     let samples_height = 150;
     let samples_width_f = samples_width as f64;
@@ -45,15 +47,14 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             ("xmlns", "http://www.w3.org/2000/svg".into()),
         ],
         vec![
-            Element {
-                name: "rect",
-                attributes: vec![
+            rect(
+                vec![
                     ("width", "100%".into()),
                     ("height", "100%".into()),
                     ("fill", "black".into()),
                 ],
-                children: vec![],
-            },
+                vec![],
+            ),
             g(vec![("fill", "white".into())], samples),
         ],
     );

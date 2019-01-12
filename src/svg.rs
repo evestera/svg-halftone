@@ -1,14 +1,14 @@
 use std::fmt;
 
 pub struct Element {
-    pub name: &'static str,
-    pub attributes: Vec<(&'static str, String)>,
-    pub children: Vec<Element>,
+    name: &'static str,
+    attributes: Vec<(&'static str, String)>,
+    children: Vec<Element>,
 }
 
 impl fmt::Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "<{}", self.name)?;
+        write!(f, "\n<{}", self.name)?;
         for (name, val) in self.attributes.iter() {
             write!(f, " {}=\"{}\"", name, val)?;
         }
@@ -17,7 +17,7 @@ impl fmt::Display for Element {
         } else {
             write!(f, ">")?;
             for element in self.children.iter() {
-                write!(f, "{}\n", element)?;
+                write!(f, "{}", element)?;
             }
             write!(f, "</{}>", self.name)?;
         }
@@ -48,6 +48,14 @@ pub fn g(attributes: Vec<(&'static str, String)>, children: Vec<Element>) -> Ele
 pub fn svg(attributes: Vec<(&'static str, String)>, children: Vec<Element>) -> Element {
     Element {
         name: "svg",
+        attributes,
+        children,
+    }
+}
+
+pub fn rect(attributes: Vec<(&'static str, String)>, children: Vec<Element>) -> Element {
+    Element {
+        name: "rect",
         attributes,
         children,
     }
