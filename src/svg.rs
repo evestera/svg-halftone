@@ -37,6 +37,28 @@ pub fn circle(cx: f64, cy: f64, r: f64) -> Element {
     }
 }
 
+#[allow(dead_code)]
+pub fn diamond(cx: f64, cy: f64, r: f64) -> Element {
+    Element {
+        name: "polygon",
+        attributes: vec![(
+            "points",
+            format!(
+                "{:.4},{:.4} {:.4},{:.4} {:.4},{:.4} {:.4},{:.4}",
+                cx,
+                cy - r,
+                cx + r,
+                cy,
+                cx,
+                cy + r,
+                cx - r,
+                cy
+            ),
+        )],
+        children: vec![],
+    }
+}
+
 pub fn g(attributes: Vec<(&'static str, String)>, children: Vec<Element>) -> Element {
     Element {
         name: "g",
