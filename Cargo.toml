@@ -1,5 +1,5 @@
 [package]
-name = "svg-raster"
+name = "svg-halftone"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 edition = "2018"
