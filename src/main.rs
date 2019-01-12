@@ -1,6 +1,6 @@
 use image::{GenericImageView, Luma, Pixel};
 use std::fs::File;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 
 mod svg;
 
@@ -13,7 +13,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let samples_height_f = samples_height as f64;
 
     let img = image::open("avatar.png")?;
-    println!("Image loaded");
 
     let image_width = img.width() as f64;
     let image_height = img.height() as f64;
@@ -34,7 +33,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             samples.push(circle(x.into(), y.into(), radius))
         }
     }
-    println!("Samples created");
 
     let data = svg(
         vec![
@@ -59,15 +57,16 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             g(vec![("fill", "white".into())], samples),
         ],
     );
-    println!("SVG AST created");
 
-    let mut f = File::create("out.svg")?;
-    writeln!(
-        f,
-        r#"<?xml version="1.0" encoding="UTF-8" standalone="no"?>"#
-    )?;
-    write!(f, "{}", data)?;
-    println!("SVG written");
+    {
+        let file = File::create("out.svg")?;
+        let mut f = BufWriter::new(file);
+        writeln!(
+            f,
+            r#"<?xml version="1.0" encoding="UTF-8" standalone="no"?>"#
+        )?;
+        write!(f, "{}", data)?;
+    }
 
     Ok(())
 }
