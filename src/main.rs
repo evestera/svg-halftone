@@ -3,21 +3,43 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::result::Result;
+use structopt::StructOpt;
 
 mod svg;
 
-use crate::svg::{circle, g, rect, svg};
+use crate::svg::{circle, diamond, g, rect, svg};
+
+#[derive(StructOpt)]
+/// Create SVG halftone patterns from raster images
+pub struct Options {
+    /// Input raster image (png, jpg, gif)
+    pub file: String,
+
+    #[structopt(long, short, default_value = "out.svg")]
+    /// Output path
+    pub output: String,
+
+    #[structopt(long, short, default_value = "50")]
+    /// Number of samples horizontally
+    pub samples: u32,
+
+    #[structopt(long, default_value = "circle")]
+    /// Shape used for samples. "circle" or "diamond"
+    pub shape: String,
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let samples_width = 150;
-    let samples_height = 150;
-    let samples_width_f = samples_width as f64;
-    let samples_height_f = samples_height as f64;
+    let options: Options = Options::from_args();
 
-    let img = image::open("avatar.png")?;
+    let img = image::open(options.file)?;
 
     let image_width = img.width() as f64;
     let image_height = img.height() as f64;
+
+    let samples_width = options.samples;
+    let samples_height = options.samples;
+    let samples_width_f = samples_width as f64;
+    let samples_height_f = samples_height as f64;
 
     let mut samples = Vec::new();
 
@@ -32,7 +54,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                 continue;
             }
 
-            samples.push(circle(x.into(), y.into(), radius))
+            let sample = match &*options.shape {
+                "diamond" => diamond(x.into(), y.into(), radius),
+                "circle" | _ => circle(x.into(), y.into(), radius),
+            };
+            samples.push(sample);
         }
     }
 
@@ -60,7 +86,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     {
-        let file = File::create("out.svg")?;
+        let file = File::create(&options.output)?;
         let mut f = BufWriter::new(file);
         writeln!(
             f,
@@ -68,6 +94,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         )?;
         write!(f, "{}", data)?;
     }
+    println!("Output written to {}", options.output);
 
     Ok(())
 }

@@ -37,7 +37,6 @@ pub fn circle(cx: f64, cy: f64, r: f64) -> Element {
     }
 }
 
-#[allow(dead_code)]
 pub fn diamond(cx: f64, cy: f64, r: f64) -> Element {
     Element {
         name: "polygon",
