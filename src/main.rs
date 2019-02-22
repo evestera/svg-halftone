@@ -10,6 +10,7 @@ mod svg;
 use crate::svg::{circle, diamond, g, rect, svg};
 
 #[derive(StructOpt)]
+#[structopt(rename_all = "kebab_case")]
 /// Create SVG halftone patterns from raster images
 pub struct Options {
     /// Input raster image (png, jpg, gif)
@@ -30,6 +31,10 @@ pub struct Options {
     #[structopt(long, default_value = "circle")]
     /// Shape used for samples. "circle" or "diamond"
     pub shape: String,
+
+    #[structopt(long, default_value = "rect")]
+    /// Grid to lay samples out on. "rect", "hex" or "diamond"
+    pub grid: String,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -46,12 +51,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let output_width = options.output_width;
     let output_height = output_width * image_ratio;
 
-    let spacing_ratio = 1.0;
+    let (spacing_ratio, offset) = match &*options.grid {
+        "rect" => (1.0, false),
+        "hex" => (0.866, true), // 2 / sqrt(3)
+        "diamond" | _ => (0.5, true),
+    };
     let spacing_x = spacing;
     let spacing_y = spacing_x * spacing_ratio;
 
     let samples_width = (output_width / spacing) as u32;
-    let samples_height = (samples_width as f64 * image_ratio * spacing_ratio) as u32;
+    let samples_height = (samples_width as f64 * image_ratio / spacing_ratio) as u32;
 
     let samples_width_f = samples_width as f64;
     let samples_height_f = samples_height as f64;
@@ -60,7 +69,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     for x in 1..samples_width {
         for y in 1..samples_height {
-            let pixel_x = (x as f64 / samples_width_f) * image_width;
+            let pixel_x = if offset && y % 2 != 0 {
+                ((x as f64 + 0.5) / samples_width_f) * image_width
+            } else {
+                (x as f64 / samples_width_f) * image_width
+            };
             let pixel_y = (y as f64 / samples_height_f) * image_height;
             let pixel: Luma<u8> = img.get_pixel(pixel_x as u32, pixel_y as u32).to_luma();
             let radius = (pixel.data[0] as f64 / 255.0) * spacing_x * 0.45;
@@ -69,7 +82,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                 continue;
             }
 
-            let sample_x = x as f64 * spacing_x;
+            let sample_x = if offset && y % 2 != 0 {
+                if x == (samples_width - 1) { continue; }
+                (x as f64 + 0.5) * spacing_x
+            } else {
+                x as f64 * spacing_x
+            };
             let sample_y = y as f64 * spacing_y;
 
             let sample = match &*options.shape {

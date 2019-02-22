@@ -29,8 +29,8 @@ pub fn circle(cx: f64, cy: f64, r: f64) -> Element {
     Element {
         name: "circle",
         attributes: vec![
-            ("cx", cx.to_string()),
-            ("cy", cy.to_string()),
+            ("cx", format!("{:.4}", cx)),
+            ("cy", format!("{:.4}", cy)),
             ("r", format!("{:.3}", r)),
         ],
         children: vec![],
