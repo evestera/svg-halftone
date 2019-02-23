@@ -22,7 +22,7 @@ before_deploy:
   # Generate artifacts for release
   - cargo build --target %TARGET% --release --verbose
   - mkdir staging
-  - copy target\release\%PROJECT_NAME%.exe staging
+  - copy target\%TARGET%\release\%PROJECT_NAME%.exe staging
   - cd staging
   - 7z a ../%PROJECT_NAME%-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip *
   - appveyor PushArtifact ../%PROJECT_NAME%-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip
