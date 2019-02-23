@@ -5,6 +5,7 @@ use std::io::{BufWriter, Write};
 use std::result::Result;
 use structopt::StructOpt;
 
+mod grid;
 mod svg;
 
 use crate::svg::{circle, diamond, g, rect, svg};
@@ -51,61 +52,38 @@ fn main() -> Result<(), Box<dyn Error>> {
     let output_width = options.output_width;
     let output_height = output_width * image_ratio;
 
-    let (spacing_ratio, offset) = match &*options.grid {
-        "rect" => (1.0, false),
-        "hex" => (0.866, true), // 2 / sqrt(3)
-        "diamond" | _ => (0.5, true),
-    };
-    let spacing_x = spacing;
-    let spacing_y = spacing_x * spacing_ratio;
-
-    let samples_width = (output_width / spacing) as u32;
-    let samples_height = (samples_width as f64 * image_ratio / spacing_ratio) as u32;
-
-    let samples_width_f = samples_width as f64;
-    let samples_height_f = samples_height as f64;
+    let resolution_ratio = output_width / image_width;
 
     let mut samples = Vec::new();
 
-    for x in 1..samples_width {
-        for y in 1..samples_height {
-            let pixel_x = if offset && y % 2 != 0 {
-                ((x as f64 + 0.5) / samples_width_f) * image_width
-            } else {
-                (x as f64 / samples_width_f) * image_width
-            };
-            let pixel_y = (y as f64 / samples_height_f) * image_height;
-            let pixel: Luma<u8> = img.get_pixel(pixel_x as u32, pixel_y as u32).to_luma();
-            let radius = (pixel.data[0] as f64 / 255.0) * spacing_x * 0.45;
+    let coords = match &*options.grid {
+        "rect" => grid::rect(output_width, output_height, spacing),
+        "hex" => grid::hex(output_width, output_height, spacing),
+        "diamond" | _ => grid::diamond(output_width, output_height, spacing),
+    };
 
-            if radius < 0.08 {
-                continue;
-            }
+    for (x, y) in coords {
+        let pixel_x = x / resolution_ratio;
+        let pixel_y = y / resolution_ratio;
+        let pixel: Luma<u8> = img.get_pixel(pixel_x as u32, pixel_y as u32).to_luma();
+        let radius = (pixel.data[0] as f64 / 255.0) * spacing * 0.45;
 
-            let sample_x = if offset && y % 2 != 0 {
-                if x == (samples_width - 1) { continue; }
-                (x as f64 + 0.5) * spacing_x
-            } else {
-                x as f64 * spacing_x
-            };
-            let sample_y = y as f64 * spacing_y;
-
-            let sample = match &*options.shape {
-                "diamond" => diamond(sample_x.into(), sample_y.into(), radius),
-                "circle" | _ => circle(sample_x.into(), sample_y.into(), radius),
-            };
-            samples.push(sample);
+        if radius < 0.08 {
+            continue;
         }
+
+        let sample = match &*options.shape {
+            "diamond" => diamond(x, y, radius),
+            "circle" | _ => circle(x, y, radius),
+        };
+        samples.push(sample);
     }
 
     let data = svg(
         vec![
             ("width", format!("{}mm", output_width)),
             ("height", format!("{}mm", output_height)),
-            (
-                "viewBox",
-                format!("0 0 {} {}", output_width, output_height),
-            ),
+            ("viewBox", format!("0 0 {} {}", output_width, output_height)),
             ("xmlns", "http://www.w3.org/2000/svg".into()),
         ],
         vec![
