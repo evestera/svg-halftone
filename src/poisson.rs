@@ -2,8 +2,8 @@
 // implementation based on Fast Poisson Disk Sampling in Arbitrary Dimensions
 // https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
 
-use std::f64::consts::PI;
 use rand::prelude::*;
+use std::f64::consts::PI;
 
 const K: u64 = 30;
 
@@ -23,7 +23,10 @@ pub fn poisson(width: f64, height: f64, spacing: f64) -> Box<dyn Iterator<Item =
     let mut samples: Vec<(f64, f64)> = vec![(-1.0, -1.0)]; // dummy at index 0
     let mut active: Vec<usize> = Vec::new();
 
-    let initial = (rng.gen_range(half_r, width - half_r), rng.gen_range(half_r, height - half_r));
+    let initial = (
+        rng.gen_range(half_r, width - half_r),
+        rng.gen_range(half_r, height - half_r),
+    );
 
     add_sample(
         &mut samples,

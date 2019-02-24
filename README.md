@@ -32,7 +32,7 @@ From `svg-halftone --help`
 - `--grid <grid>`: Grid to lay samples out on. "rect", "hex", "diamond" or "poisson" [default: rect]
 - `--output <output>`: Output path [default: out.svg]
 - `--output-width <output-width>`: Output width in mm [default: 300]
-- `--shape <shape>`: Shape used for samples. "circle" or "diamond" [default: circle]
+- `--shape <shape>`: Shape used for samples. "circle", "hex" or "diamond" [default: circle]
 - `--spacing <spacing>`: Horizontal spacing between samples in mm [default: 5]
 
 ## Useful programs/tools

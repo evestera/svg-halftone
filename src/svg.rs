@@ -1,4 +1,6 @@
+use std::f64::consts::PI;
 use std::fmt;
+use std::fmt::Write;
 
 pub struct Element {
     name: &'static str,
@@ -56,6 +58,24 @@ pub fn diamond(cx: f64, cy: f64, r: f64) -> Element {
         )],
         children: vec![],
     }
+}
+
+pub fn hex(cx: f64, cy: f64, r: f64) -> Element {
+    let mut points = String::new();
+    for i in 1..=6 {
+        let corner = hex_corner(cx, cy, r, i);
+        write!(points, "{:.4},{:.4} ", corner.0, corner.1).unwrap();
+    }
+    Element {
+        name: "polygon",
+        attributes: vec![("points", points)],
+        children: vec![],
+    }
+}
+
+fn hex_corner(cx: f64, cy: f64, r: f64, i: u8) -> (f64, f64) {
+    let angle: f64 = (i as f64) * PI / 3.0 - PI / 6.0;
+    (cx + r * angle.cos(), cy + r * angle.sin())
 }
 
 pub fn g(attributes: Vec<(&'static str, String)>, children: Vec<Element>) -> Element {

@@ -9,8 +9,6 @@ mod grid;
 mod poisson;
 mod svg;
 
-use crate::svg::{circle, diamond, g, rect, svg};
-
 #[derive(StructOpt)]
 #[structopt(rename_all = "kebab_case")]
 /// Create SVG halftone patterns from raster images
@@ -31,7 +29,7 @@ pub struct Options {
     pub spacing: f64,
 
     #[structopt(long, default_value = "circle")]
-    /// Shape used for samples. "circle" or "diamond"
+    /// Shape used for samples. "circle", "hex" or "diamond"
     pub shape: String,
 
     #[structopt(long, default_value = "rect")]
@@ -75,13 +73,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         let sample = match &*options.shape {
-            "diamond" => diamond(x, y, radius),
-            "circle" | _ => circle(x, y, radius),
+            "diamond" => svg::diamond(x, y, radius),
+            "hex" => svg::hex(x, y, radius),
+            "circle" | _ => svg::circle(x, y, radius),
         };
         samples.push(sample);
     }
 
-    let data = svg(
+    let data = svg::svg(
         vec![
             ("width", format!("{}mm", output_width)),
             ("height", format!("{}mm", output_height)),
@@ -89,7 +88,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             ("xmlns", "http://www.w3.org/2000/svg".into()),
         ],
         vec![
-            rect(
+            svg::rect(
                 vec![
                     ("width", "100%".into()),
                     ("height", "100%".into()),
@@ -97,7 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 ],
                 vec![],
             ),
-            g(vec![("fill", "white".into())], samples),
+            svg::g(vec![("fill", "white".into())], samples),
         ],
     );
 
