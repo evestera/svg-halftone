@@ -29,7 +29,7 @@ svg-halftone my-image.jpg
 
 From `svg-halftone --help`
 
-- `--grid <grid>`: Grid to lay samples out on. "rect", "hex" or "diamond" [default: rect]
+- `--grid <grid>`: Grid to lay samples out on. "rect", "hex", "diamond" or "poisson" [default: rect]
 - `--output <output>`: Output path [default: out.svg]
 - `--output-width <output-width>`: Output width in mm [default: 300]
 - `--shape <shape>`: Shape used for samples. "circle" or "diamond" [default: circle]

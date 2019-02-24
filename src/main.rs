@@ -6,6 +6,7 @@ use std::result::Result;
 use structopt::StructOpt;
 
 mod grid;
+mod poisson;
 mod svg;
 
 use crate::svg::{circle, diamond, g, rect, svg};
@@ -34,7 +35,7 @@ pub struct Options {
     pub shape: String,
 
     #[structopt(long, default_value = "rect")]
-    /// Grid to lay samples out on. "rect", "hex" or "diamond"
+    /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson"
     pub grid: String,
 }
 
@@ -59,7 +60,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let coords = match &*options.grid {
         "rect" => grid::rect(output_width, output_height, spacing),
         "hex" => grid::hex(output_width, output_height, spacing),
-        "diamond" | _ => grid::diamond(output_width, output_height, spacing),
+        "diamond" => grid::diamond(output_width, output_height, spacing),
+        "poisson" | _ => poisson::poisson(output_width, output_height, spacing),
     };
 
     for (x, y) in coords {
