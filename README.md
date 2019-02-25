@@ -37,6 +37,28 @@ From `svg-halftone --help`
 - `--invert`: Make shapes black on white. I.e. holes show a darker background.
 - `--cut-paths`: Draw cut paths only (no fill and background). I.e. make a file ready for cutting.
 
+### Examples
+
+Image used as input for these examples:
+
+<img src="images/gradient.jpg" alt="" width="300" />
+
+`--shape circle --grid rect` (default)
+
+<img src="images/default.svg" alt="" width="300" />
+
+`--shape circle --grid poisson`
+
+<img src="images/poisson.svg" alt="" width="300" />
+
+`--shape hex --grid hex`
+
+<img src="images/hex.svg" alt="" width="300" />
+
+`--shape diamond --grid diamond`
+
+<img src="images/diamond.svg" alt="" width="300" />
+
 ## Useful programs/tools
 
 - [remove.bg](https://www.remove.bg/): Easily replace backgrounds of images of people with a single color.
