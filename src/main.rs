@@ -35,12 +35,23 @@ pub struct Options {
     #[structopt(long, default_value = "rect")]
     /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson"
     pub grid: String,
+
+    #[structopt(long)]
+    /// Make shapes black on white. I.e. holes show a darker background.
+    pub invert: bool,
+
+    #[structopt(long)]
+    /// Draw cut paths only (no fill and background). I.e. make a file ready for cutting.
+    pub cut_paths: bool,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let options: Options = Options::from_args();
 
-    let img = image::open(options.file)?;
+    let mut img = image::open(options.file)?;
+    if options.invert {
+        img.invert();
+    }
 
     let image_width = img.width() as f64;
     let image_height = img.height() as f64;
@@ -87,17 +98,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             ("viewBox", format!("0 0 {} {}", output_width, output_height)),
             ("xmlns", "http://www.w3.org/2000/svg".into()),
         ],
-        vec![
-            svg::rect(
-                vec![
-                    ("width", "100%".into()),
-                    ("height", "100%".into()),
-                    ("fill", "black".into()),
-                ],
-                vec![],
-            ),
-            svg::g(vec![("fill", "white".into())], samples),
-        ],
+        if options.cut_paths {
+            svg::cut_paths(samples)
+        } else if options.invert {
+            svg::black_on_white(samples)
+        } else {
+            svg::white_on_black(samples)
+        },
     );
 
     {

@@ -101,3 +101,42 @@ pub fn rect(attributes: Vec<(&'static str, String)>, children: Vec<Element>) -> 
         children,
     }
 }
+
+pub fn cut_paths(samples: Vec<Element>) -> Vec<Element> {
+    vec![g(
+        vec![
+            ("stroke-width", "0.002mm".into()),
+            ("stroke", "black".into()),
+            ("fill", "none".into()),
+        ],
+        samples,
+    )]
+}
+
+pub fn white_on_black(samples: Vec<Element>) -> Vec<Element> {
+    vec![
+        rect(
+            vec![
+                ("width", "100%".into()),
+                ("height", "100%".into()),
+                ("fill", "black".into()),
+            ],
+            vec![],
+        ),
+        g(vec![("fill", "white".into())], samples),
+    ]
+}
+
+pub fn black_on_white(samples: Vec<Element>) -> Vec<Element> {
+    vec![
+        rect(
+            vec![
+                ("width", "100%".into()),
+                ("height", "100%".into()),
+                ("fill", "white".into()),
+            ],
+            vec![],
+        ),
+        g(vec![("fill", "black".into())], samples),
+    ]
+}

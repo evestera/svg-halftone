@@ -34,6 +34,8 @@ From `svg-halftone --help`
 - `--output-width <output-width>`: Output width in mm [default: 300]
 - `--shape <shape>`: Shape used for samples. "circle", "hex" or "diamond" [default: circle]
 - `--spacing <spacing>`: Horizontal spacing between samples in mm [default: 5]
+- `--invert`: Make shapes black on white. I.e. holes show a darker background.
+- `--cut-paths`: Draw cut paths only (no fill and background). I.e. make a file ready for cutting.
 
 ## Useful programs/tools
 
