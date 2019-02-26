@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let spacing = options.spacing;
     let output_width = options.output_width;
-    let output_height = output_width * image_ratio;
+    let output_height = output_width / image_ratio;
 
     let resolution_ratio = output_width / image_width;
 
@@ -74,9 +74,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     for (x, y) in coords {
-        let pixel_x = x / resolution_ratio;
-        let pixel_y = y / resolution_ratio;
-        let pixel: Luma<u8> = img.get_pixel(pixel_x as u32, pixel_y as u32).to_luma();
+        let pixel_x = (x / resolution_ratio) as u32;
+        let pixel_y = (y / resolution_ratio) as u32;
+        let pixel: Luma<u8> = img.get_pixel(pixel_x, pixel_y).to_luma();
         let radius = (pixel.data[0] as f64 / 255.0) * spacing * 0.45;
 
         if radius < 0.08 {
