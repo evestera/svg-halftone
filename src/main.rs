@@ -43,14 +43,23 @@ pub struct Options {
     #[structopt(long)]
     /// Draw cut paths only (no fill and background). I.e. make a file ready for cutting.
     pub cut_paths: bool,
+
+    #[structopt(long, raw(allow_hyphen_values = "true"))]
+    /// Adjust contrast of input image before processing.
+    /// Positive numbers increase contrast, negative numbers decrease it.
+    pub contrast: Option<f32>,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let options: Options = Options::from_args();
 
     let mut img = image::open(options.file)?;
+
     if options.invert {
         img.invert();
+    }
+    if let Some(contrast) = options.contrast {
+        img = img.adjust_contrast(contrast);
     }
 
     let image_width = img.width() as f64;
