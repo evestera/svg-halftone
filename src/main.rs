@@ -28,13 +28,14 @@ pub struct Options {
     /// Horizontal spacing between samples in mm
     pub spacing: f64,
 
-    #[structopt(long, default_value = "circle")]
+    #[structopt(long, default_value = "circle", parse(try_from_str = "parse_shape"))]
     /// Shape used for samples. "circle", "hex" or "diamond"
-    pub shape: String,
+    pub shape: Shape,
 
-    #[structopt(long, default_value = "rect")]
-    /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson"
-    pub grid: String,
+    #[structopt(long, parse(try_from_str = "parse_grid"))]
+    /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson". Defaults to the grid
+    /// best suited to the chosen shape.
+    pub grid: Option<Grid>,
 
     #[structopt(long)]
     /// Make shapes black on white. I.e. holes show a darker background.
@@ -48,6 +49,48 @@ pub struct Options {
     /// Adjust contrast of input image before processing.
     /// Positive numbers increase contrast, negative numbers decrease it.
     pub contrast: Option<f32>,
+}
+
+pub enum Shape {
+    Circle,
+    Hex,
+    Diamond
+}
+
+fn parse_shape(s: &str) -> Result<Shape, String> {
+    match s {
+        "diamond" => Ok(Shape::Diamond),
+        "hex" => Ok(Shape::Hex),
+        "circle" => Ok(Shape::Circle),
+        _ => Err(format!("no shape type named '{}'", s))
+    }
+}
+
+impl Shape {
+    fn corresponding_grid(&self) -> Grid {
+        match self {
+            Shape::Circle => Grid::Rect,
+            Shape::Hex => Grid::Hex,
+            Shape::Diamond => Grid::Diamond,
+        }
+    }
+}
+
+pub enum Grid {
+    Rect,
+    Hex,
+    Diamond,
+    Poisson
+}
+
+fn parse_grid(s: &str) -> Result<Grid, String> {
+    match s {
+        "rect" => Ok(Grid::Rect),
+        "hex" => Ok(Grid::Hex),
+        "diamond" => Ok(Grid::Diamond),
+        "poisson" => Ok(Grid::Poisson),
+        _ => Err(format!("no grid type named '{}'", s))
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -67,6 +110,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let image_ratio = image_width / image_height;
 
+    let grid = match options.grid {
+        Some(grid) => grid,
+        None => options.shape.corresponding_grid(),
+    };
+
     let spacing = options.spacing;
     let output_width = options.output_width;
     let output_height = output_width / image_ratio;
@@ -75,11 +123,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut samples = Vec::new();
 
-    let coords = match &*options.grid {
-        "rect" => grid::rect(output_width, output_height, spacing),
-        "hex" => grid::hex(output_width, output_height, spacing),
-        "diamond" => grid::diamond(output_width, output_height, spacing),
-        "poisson" | _ => poisson::poisson(output_width, output_height, spacing),
+    let coords = match grid {
+        Grid::Rect => grid::rect(output_width, output_height, spacing),
+        Grid::Hex => grid::hex(output_width, output_height, spacing),
+        Grid::Diamond => grid::diamond(output_width, output_height, spacing),
+        Grid::Poisson => poisson::poisson(output_width, output_height, spacing),
     };
 
     for (x, y) in coords {
@@ -92,10 +140,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             continue;
         }
 
-        let sample = match &*options.shape {
-            "diamond" => svg::diamond(x, y, radius),
-            "hex" => svg::hex(x, y, radius),
-            "circle" | _ => svg::circle(x, y, radius),
+        let sample = match options.shape {
+            Shape::Diamond => svg::diamond(x, y, radius),
+            Shape::Hex => svg::hex(x, y, radius),
+            Shape::Circle => svg::circle(x, y, radius),
         };
         samples.push(sample);
     }

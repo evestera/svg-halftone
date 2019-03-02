@@ -29,12 +29,13 @@ svg-halftone my-image.jpg
 
 From `svg-halftone --help`
 
-- `--grid <grid>`: Grid to lay samples out on. "rect", "hex", "diamond" or "poisson" [default: rect]
+- `--shape <shape>`: Shape used for samples. "circle", "hex" or "diamond" [default: circle]
+- `--grid <grid>`: Grid to lay samples out on. "rect", "hex", "diamond" or "poisson". Defaults to the grid best suited to the chosen shape. 
+- `--contrast <contrast>`: Adjust contrast of input image before processing. Positive numbers increase contrast, negative numbers decrease it.
+- `--invert`: Make shapes black on white. I.e. holes show a darker background.
 - `--output <output>`: Output path [default: out.svg]
 - `--output-width <output-width>`: Output width in mm [default: 300]
-- `--shape <shape>`: Shape used for samples. "circle", "hex" or "diamond" [default: circle]
 - `--spacing <spacing>`: Horizontal spacing between samples in mm [default: 5]
-- `--invert`: Make shapes black on white. I.e. holes show a darker background.
 - `--cut-paths`: Draw cut paths only (no fill and background). I.e. make a file ready for cutting.
 
 ### Examples
@@ -51,11 +52,11 @@ Image used as input for these examples:
 
 <img src="images/poisson.svg" alt="" width="300" />
 
-`--shape hex --grid hex`
+`--shape hex` (also sets `--grid hex`)
 
 <img src="images/hex.svg" alt="" width="300" />
 
-`--shape diamond --grid diamond`
+`--shape diamond` (also sets `--grid diamond`)
 
 <img src="images/diamond.svg" alt="" width="300" />
 
