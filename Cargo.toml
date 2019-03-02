@@ -1,6 +1,6 @@
 [package]
 name = "svg-halftone"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 edition = "2018"
 
