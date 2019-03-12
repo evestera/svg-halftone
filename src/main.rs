@@ -1,4 +1,4 @@
-use image::{GenericImageView, Luma, Pixel};
+use image::{GenericImageView, GenericImage, Luma, Pixel};
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -28,9 +28,10 @@ pub struct Options {
     /// Horizontal spacing between samples in mm
     pub spacing: f64,
 
-    #[structopt(long, default_value = "circle", parse(try_from_str = "parse_shape"))]
-    /// Shape used for samples. "circle", "hex" or "diamond"
-    pub shape: Shape,
+    #[structopt(long, parse(try_from_str = "parse_shape"))]
+    /// Shape used for samples. "circle", "hex" or "diamond". Defaults to the shape
+    /// best suited to the chosen grid.
+    pub shape: Option<Shape>,
 
     #[structopt(long, parse(try_from_str = "parse_grid"))]
     /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson". Defaults to the grid
@@ -51,6 +52,7 @@ pub struct Options {
     pub contrast: Option<f32>,
 }
 
+#[derive(Copy, Clone)]
 pub enum Shape {
     Circle,
     Hex,
@@ -76,6 +78,7 @@ impl Shape {
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum Grid {
     Rect,
     Hex,
@@ -90,6 +93,17 @@ fn parse_grid(s: &str) -> Result<Grid, String> {
         "diamond" => Ok(Grid::Diamond),
         "poisson" => Ok(Grid::Poisson),
         _ => Err(format!("no grid type named '{}'", s))
+    }
+}
+
+impl Grid {
+    fn corresponding_shape(&self) -> Shape {
+        match self {
+            Grid::Rect => Shape::Circle,
+            Grid::Hex => Shape::Hex,
+            Grid::Diamond => Shape::Diamond,
+            Grid::Poisson => Shape::Circle,
+        }
     }
 }
 
@@ -110,9 +124,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let image_ratio = image_width / image_height;
 
-    let grid = match options.grid {
-        Some(grid) => grid,
-        None => options.shape.corresponding_grid(),
+    let (shape, grid) = match (options.shape, options.grid) {
+        (Some(shape), Some(grid)) => (shape, grid),
+        (Some(shape), None) => (shape, shape.corresponding_grid()),
+        (None, Some(grid)) => (grid.corresponding_shape(), grid),
+        (None, None) => (Shape::Circle, Grid::Rect),
     };
 
     let spacing = options.spacing;
@@ -140,7 +156,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             continue;
         }
 
-        let sample = match options.shape {
+        let sample = match shape {
             Shape::Diamond => svg::diamond(x, y, radius),
             Shape::Hex => svg::hex(x, y, radius),
             Shape::Circle => svg::circle(x, y, radius),
