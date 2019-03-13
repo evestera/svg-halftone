@@ -1,18 +1,15 @@
-use image::{GenericImageView, GenericImage, Luma, Pixel};
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::result::Result;
+use std::str::FromStr;
 use structopt::StructOpt;
-
-mod grid;
-mod poisson;
-mod svg;
+use svg_halftone_lib::{create_halftone_svg, Grid, Options, Shape};
 
 #[derive(StructOpt)]
 #[structopt(rename_all = "kebab_case")]
 /// Create SVG halftone patterns from raster images
-pub struct Options {
+pub struct CliOptions {
     /// Input raster image (png, jpg, gif)
     pub file: String,
 
@@ -28,12 +25,12 @@ pub struct Options {
     /// Horizontal spacing between samples in mm
     pub spacing: f64,
 
-    #[structopt(long, parse(try_from_str = "parse_shape"))]
+    #[structopt(long, parse(try_from_str = "Shape::from_str"))]
     /// Shape used for samples. "circle", "hex" or "diamond". Defaults to the shape
     /// best suited to the chosen grid.
     pub shape: Option<Shape>,
 
-    #[structopt(long, parse(try_from_str = "parse_grid"))]
+    #[structopt(long, parse(try_from_str = "Grid::from_str"))]
     /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson". Defaults to the grid
     /// best suited to the chosen shape.
     pub grid: Option<Grid>,
@@ -52,136 +49,31 @@ pub struct Options {
     pub contrast: Option<f32>,
 }
 
-#[derive(Copy, Clone)]
-pub enum Shape {
-    Circle,
-    Hex,
-    Diamond
-}
-
-fn parse_shape(s: &str) -> Result<Shape, String> {
-    match s {
-        "diamond" => Ok(Shape::Diamond),
-        "hex" => Ok(Shape::Hex),
-        "circle" => Ok(Shape::Circle),
-        _ => Err(format!("no shape type named '{}'", s))
-    }
-}
-
-impl Shape {
-    fn corresponding_grid(&self) -> Grid {
-        match self {
-            Shape::Circle => Grid::Rect,
-            Shape::Hex => Grid::Hex,
-            Shape::Diamond => Grid::Diamond,
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-pub enum Grid {
-    Rect,
-    Hex,
-    Diamond,
-    Poisson
-}
-
-fn parse_grid(s: &str) -> Result<Grid, String> {
-    match s {
-        "rect" => Ok(Grid::Rect),
-        "hex" => Ok(Grid::Hex),
-        "diamond" => Ok(Grid::Diamond),
-        "poisson" => Ok(Grid::Poisson),
-        _ => Err(format!("no grid type named '{}'", s))
-    }
-}
-
-impl Grid {
-    fn corresponding_shape(&self) -> Shape {
-        match self {
-            Grid::Rect => Shape::Circle,
-            Grid::Hex => Shape::Hex,
-            Grid::Diamond => Shape::Diamond,
-            Grid::Poisson => Shape::Circle,
-        }
-    }
-}
-
 fn main() -> Result<(), Box<dyn Error>> {
-    let options: Options = Options::from_args();
+    let cli_options: CliOptions = CliOptions::from_args();
 
-    let mut img = image::open(options.file)?;
+    let img = image::open(cli_options.file)?;
 
-    if options.invert {
-        img.invert();
-    }
-    if let Some(contrast) = options.contrast {
-        img = img.adjust_contrast(contrast);
-    }
-
-    let image_width = img.width() as f64;
-    let image_height = img.height() as f64;
-
-    let image_ratio = image_width / image_height;
-
-    let (shape, grid) = match (options.shape, options.grid) {
+    let (shape, grid) = match (cli_options.shape, cli_options.grid) {
         (Some(shape), Some(grid)) => (shape, grid),
-        (Some(shape), None) => (shape, shape.corresponding_grid()),
-        (None, Some(grid)) => (grid.corresponding_shape(), grid),
+        (Some(shape), None) => (shape, Grid::from(shape)),
+        (None, Some(grid)) => (Shape::from(grid), grid),
         (None, None) => (Shape::Circle, Grid::Rect),
     };
 
-    let spacing = options.spacing;
-    let output_width = options.output_width;
-    let output_height = output_width / image_ratio;
-
-    let resolution_ratio = output_width / image_width;
-
-    let mut samples = Vec::new();
-
-    let coords = match grid {
-        Grid::Rect => grid::rect(output_width, output_height, spacing),
-        Grid::Hex => grid::hex(output_width, output_height, spacing),
-        Grid::Diamond => grid::diamond(output_width, output_height, spacing),
-        Grid::Poisson => poisson::poisson(output_width, output_height, spacing),
-    };
-
-    for (x, y) in coords {
-        let pixel_x = (x / resolution_ratio) as u32;
-        let pixel_y = (y / resolution_ratio) as u32;
-        let pixel: Luma<u8> = img.get_pixel(pixel_x, pixel_y).to_luma();
-        let radius = (pixel.data[0] as f64 / 255.0) * spacing * 0.45;
-
-        if radius < 0.08 {
-            continue;
-        }
-
-        let sample = match shape {
-            Shape::Diamond => svg::diamond(x, y, radius),
-            Shape::Hex => svg::hex(x, y, radius),
-            Shape::Circle => svg::circle(x, y, radius),
-        };
-        samples.push(sample);
-    }
-
-    let data = svg::svg(
-        vec![
-            ("width", format!("{}mm", output_width)),
-            ("height", format!("{}mm", output_height)),
-            ("viewBox", format!("0 0 {} {}", output_width, output_height)),
-            ("xmlns", "http://www.w3.org/2000/svg".into()),
-        ],
-        if options.cut_paths {
-            svg::cut_paths(samples)
-        } else if options.invert {
-            svg::black_on_white(samples)
-        } else {
-            svg::white_on_black(samples)
-        },
-    );
+    let data = create_halftone_svg(Options {
+        image: img,
+        output_width: cli_options.output_width,
+        spacing: cli_options.spacing,
+        shape,
+        grid,
+        invert: cli_options.invert,
+        cut_paths: cli_options.cut_paths,
+        contrast: cli_options.contrast,
+    });
 
     {
-        let file = File::create(&options.output)?;
+        let file = File::create(&cli_options.output)?;
         let mut f = BufWriter::new(file);
         writeln!(
             f,
@@ -189,7 +81,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         )?;
         write!(f, "{}", data)?;
     }
-    println!("Output written to {}", options.output);
+    println!("Output written to {}", cli_options.output);
 
     Ok(())
 }
