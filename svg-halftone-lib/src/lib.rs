@@ -7,6 +7,7 @@ mod svg;
 
 pub use options::{Grid, Options, Shape};
 pub use svg::Element;
+pub use image;
 
 pub fn create_halftone_svg(options: Options) -> Element {
     let mut img = options.image;

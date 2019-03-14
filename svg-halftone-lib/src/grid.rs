@@ -30,8 +30,8 @@ fn grid(
         y_remainder += spacing_y;
     }
 
-    Box::new((1..=(x_count as u32)).flat_map(move |x| {
-        (1..=(y_count as u32))
+    Box::new((1..=x_count).flat_map(move |x| {
+        (1..=y_count)
             .map(move |y| (x, y))
             .filter(move |(x, y)| !offset || y % 2 == 0 || x != &x_count)
             .map(move |(x, y)| {

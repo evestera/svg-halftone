@@ -4,7 +4,7 @@ use std::io::{BufWriter, Write};
 use std::result::Result;
 use std::str::FromStr;
 use structopt::StructOpt;
-use svg_halftone_lib::{create_halftone_svg, Grid, Options, Shape};
+use svg_halftone_lib::{create_halftone_svg, Grid, Options, Shape, image};
 
 #[derive(StructOpt)]
 #[structopt(rename_all = "kebab_case")]
