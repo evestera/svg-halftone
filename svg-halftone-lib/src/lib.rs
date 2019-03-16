@@ -1,4 +1,4 @@
-use image::{GenericImageView, Luma, Pixel};
+use image::{GenericImageView, LumaA, Pixel};
 
 mod grid;
 mod options;
@@ -44,8 +44,10 @@ pub fn create_halftone_svg(options: Options) -> Element {
     for (x, y) in coords {
         let pixel_x = (x / resolution_ratio) as u32;
         let pixel_y = (y / resolution_ratio) as u32;
-        let pixel: Luma<u8> = img.get_pixel(pixel_x, pixel_y).to_luma();
-        let radius = (pixel.data[0] as f64 / 255.0) * spacing * 0.45;
+        let pixel: LumaA<u8> = img.get_pixel(pixel_x, pixel_y).to_luma_alpha();
+        let luma = pixel.data[0] as f64 / 255.0;
+        let alpha = pixel.data[1] as f64 / 255.0;
+        let radius = luma * alpha * spacing * 0.45;
 
         if radius < 0.08 {
             continue;
