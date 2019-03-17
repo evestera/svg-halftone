@@ -9,6 +9,8 @@ that can be cut on a laser cutter, turning the halftone dots into holes.
 [raster]: https://en.wikipedia.org/wiki/Raster_graphics
 [halftone]: https://en.wikipedia.org/wiki/Halftone
 
+The tool comes as a CLI, detailed below, and as a web-based version at [halftone.vestera.as](https://halftone.vestera.as)
+
 ## Installation
 
 There are precompiled binaries of releases on [the releases page](https://github.com/evestera/svg-halftone/releases).

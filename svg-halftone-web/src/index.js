@@ -23,6 +23,9 @@ import("../../svg-halftone-wasm/pkg").then(module => {
     const invert = !document.getElementById('invert').checked;
     const cutpaths = document.getElementById('cutpaths').checked;
 
+    const spinnerOverlay = document.getElementById('spinner-overlay');
+    spinnerOverlay.className = '';
+
     const reader = new FileReader();
     reader.onload = () => {
       const buffer = reader.result;
@@ -37,7 +40,8 @@ import("../../svg-halftone-wasm/pkg").then(module => {
         cutpaths
       );
       const target = document.getElementById('target');
-      target.innerHTML = result;
+      target.innerHTML = result || '<p>Something went wrong when generating the SVG. Sorry!</p>';
+      spinnerOverlay.className = 'is-invisible';
 
       const svgDoc = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' + result;
       const encoded = btoa(svgDoc);
