@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 cfg-if = "0.1.5"
-wasm-bindgen = "0.2.25"
+wasm-bindgen = "0.2.68"
 svg-halftone-lib = { path = "../svg-halftone-lib", features = ["wasm"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
@@ -30,6 +30,6 @@ wee_alloc = { version = "0.4.2", optional = true }
 #default = ["console_error_panic_hook"]
 default = []
 
-[profile.release]
-lto = true
-#opt-level = "s" # disabled due to it apparently causing bugs
+# Workaround for https://github.com/rustwasm/wasm-pack/issues/886
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Oz", "--enable-mutable-globals"]

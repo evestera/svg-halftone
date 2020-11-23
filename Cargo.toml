@@ -13,3 +13,8 @@ members = [
   "svg-halftone-lib",
   "svg-halftone-wasm"
 ]
+
+# Consider uncommenting before doing wasm build/deploy:
+#[profile.release]
+#lto = true
+#opt-level = "s" # disabled due to it apparently causing bugs
