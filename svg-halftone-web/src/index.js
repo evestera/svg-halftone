@@ -1,6 +1,6 @@
 import { polyfill } from './polyfill';
 
-polyfill.then(() => import("../../svg-halftone-wasm/pkg")).then(module => {
+polyfill().then(() => import("../../svg-halftone-wasm/pkg")).then(module => {
   const render = () => {
     const input = document.getElementById('input');
     const files = input.files;
