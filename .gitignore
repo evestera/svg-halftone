@@ -11,3 +11,4 @@ svg-halftone-wasm/pkg/
 svg-halftone-web/node_modules/
 svg-halftone-web/dist/
 svg-halftone-web/.firebase/
+svg-halftone-web/pkg/
