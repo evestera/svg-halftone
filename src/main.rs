@@ -25,12 +25,12 @@ pub struct CliOptions {
     /// Horizontal spacing between samples in mm
     pub spacing: f64,
 
-    #[structopt(long, parse(try_from_str = "Shape::from_str"))]
+    #[structopt(long, parse(try_from_str = Shape::from_str))]
     /// Shape used for samples. "circle", "hex" or "diamond". Defaults to the shape
     /// best suited to the chosen grid.
     pub shape: Option<Shape>,
 
-    #[structopt(long, parse(try_from_str = "Grid::from_str"))]
+    #[structopt(long, parse(try_from_str = Grid::from_str))]
     /// Grid to lay samples out on. "rect", "hex", "diamond" or "poisson". Defaults to the grid
     /// best suited to the chosen shape.
     pub grid: Option<Grid>,
@@ -43,7 +43,7 @@ pub struct CliOptions {
     /// Draw cut paths only (no fill and background). I.e. make a file ready for cutting.
     pub cut_paths: bool,
 
-    #[structopt(long, raw(allow_hyphen_values = "true"))]
+    #[structopt(long, allow_hyphen_values = true)]
     /// Adjust contrast of input image before processing.
     /// Positive numbers increase contrast, negative numbers decrease it.
     pub contrast: Option<f32>,
