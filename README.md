@@ -31,7 +31,7 @@ svg-halftone my-image.jpg
 
 From `svg-halftone --help`
 
-- `--shape <shape>`: Shape used for samples. "circle", "hex" or "diamond". Shape used for samples. "circle", "hex" or "diamond". Defaults to the shape best suited to the chosen grid.
+- `--shape <shape>`: Shape used for samples. "circle", "hex" or "diamond". Defaults to the shape best suited to the chosen grid.
 - `--grid <grid>`: Grid to lay samples out on. "rect", "hex", "diamond" or "poisson". Defaults to the grid best suited to the chosen shape. 
 - `--contrast <contrast>`: Adjust contrast of input image before processing. Positive numbers increase contrast, negative numbers decrease it.
 - `--invert`: Make shapes black on white. I.e. holes show a darker background.
