@@ -70,6 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         invert: cli_options.invert,
         cut_paths: cli_options.cut_paths,
         contrast: cli_options.contrast,
+        multi_sample: true,
     });
 
     {

@@ -11,6 +11,7 @@ pub struct Options {
     pub invert: bool,
     pub cut_paths: bool,
     pub contrast: Option<f32>,
+    pub multi_sample: bool,
 }
 
 #[derive(Copy, Clone)]

@@ -1,8 +1,9 @@
-use image::{GenericImageView, LumaA, Pixel};
+use image::GenericImageView;
 
 mod grid;
 mod options;
 mod poisson;
+mod sampling;
 mod svg;
 
 pub use options::{Grid, Options, Shape};
@@ -42,12 +43,14 @@ pub fn create_halftone_svg(options: Options) -> Element {
     };
 
     for (x, y) in coords {
-        let pixel_x = (x / resolution_ratio) as u32;
-        let pixel_y = (y / resolution_ratio) as u32;
-        let pixel: LumaA<u8> = img.get_pixel(pixel_x, pixel_y).to_luma_alpha();
-        let luma = pixel.data[0] as f64 / 255.0;
-        let alpha = pixel.data[1] as f64 / 255.0;
-        let radius = luma * alpha * spacing * 0.45;
+        let max_radius = spacing * 0.45;
+        let sample = if options.multi_sample {
+            sampling::multi_sample_around_point(&img, resolution_ratio, (x, y), max_radius)
+        } else {
+            sampling::sample_point(&img, resolution_ratio, (x, y))
+        };
+
+        let radius = sample * max_radius;
 
         if radius < 0.08 {
             continue;

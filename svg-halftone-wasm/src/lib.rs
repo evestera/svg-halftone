@@ -57,6 +57,7 @@ pub fn run(
         invert,
         cut_paths,
         contrast: None,
+        multi_sample: true,
     });
 
     Some(format!("{}", data))
