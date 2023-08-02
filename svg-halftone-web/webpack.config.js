@@ -11,7 +11,7 @@ module.exports = {
     filename: "bundle.js"
   },
   devServer: {
-    contentBase: dist,
+    static: dist,
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -22,5 +22,8 @@ module.exports = {
       crateDirectory: path.resolve(__dirname, "../svg-halftone-wasm"),
       forceMode: 'release'
     }),
-  ]
+  ],
+  experiments: {
+    syncWebAssembly: true
+  }
 };

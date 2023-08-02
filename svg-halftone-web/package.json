@@ -5,16 +5,16 @@
   "repository": "https://github.com/evestera/svg-halftone",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server -d",
-    "build": "rm -rf dist && webpack && cp favicon.ico dist",
+    "start": "webpack serve --mode development",
+    "build": "rm -rf dist && webpack --mode production && cp favicon.ico dist",
     "deploy": "npm run build && firebase deploy"
   },
   "devDependencies": {
-    "@wasm-tool/wasm-pack-plugin": "1.3.1",
-    "html-webpack-plugin": "^3.2.0",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
+    "@wasm-tool/wasm-pack-plugin": "^1.7.0",
+    "html-webpack-plugin": "^5.5.3",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
     "text-encoding-utf-8": "^1.0.2"
